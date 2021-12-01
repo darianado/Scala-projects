@@ -58,3 +58,5 @@ def last_odd(n: Long) : Long = {
         else last_odd(3*n+1)
     }
 }
+
+}
