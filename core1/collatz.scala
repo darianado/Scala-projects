@@ -16,7 +16,6 @@ def collatz(n: Long) : Long = {
     1 + collatz(3*n+1)
 }
 
-
 //(2) Complete the collatz_max function below. It should
 //    calculate how many steps are needed for each number 
 //    from 1 up to a bound and then calculate the maximum number of
@@ -59,5 +58,3 @@ def last_odd(n: Long) : Long = {
         else last_odd(3*n+1)
     }
 }
-
-
