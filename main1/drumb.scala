@@ -68,7 +68,11 @@ def get_delta(price_old: Option[Double], price_new: Option[Double]) : Option[Dou
 //     portfolio). The input to this function are the nested lists created by 
 //     get_prices above.
 
-def get_deltas(data: List[List[Option[Double]]]) :  List[List[Option[Double]]] = ???
+def get_deltas(data: List[List[Option[Double]]]) :  List[List[Option[Double]]] = {
+   for ((f, s) <- data zip data.drop(1)) yield 
+       for (p <- f)  yield get_delta( p, s( f.indexOf(p) ) )
+                  
+}
 
 
 
