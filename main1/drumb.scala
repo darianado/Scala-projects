@@ -18,8 +18,12 @@ val rstate_portfolio = List("PLD", "PSA", "AMT", "AIV", "AVB", "BXP", "CCI",
 import io.Source
 import scala.util._
 
-def get_january_data(symbol: String, year: Int) : List[String] = ???
-
+def get_january_data(symbol: String, year: Int) : List[String] = {
+    Try(Source.fromFile(symbol++".csv")("ISO-8859-1")
+                .getLines().toList
+                .filter(_.startsWith(year.toString)))
+                                        .getOrElse(List())
+}
 
 // (2) From the output of the get_january_data function, the next function 
 //     should extract the first line (if it exists) and the corresponding
@@ -28,7 +32,10 @@ def get_january_data(symbol: String, year: Int) : List[String] = ???
 //     there is a price.
 
 
-def get_first_price(symbol: String, year: Int) : Option[Double] = ???
+def get_first_price(symbol: String, year: Int) : Option[Double] ={
+    Try(Some(get_january_data(symbol,year).head.split(",").toList(1).toDouble))
+        .getOrElse(None)
+}
 
 
 // (3) Complete the function below that obtains all first prices
@@ -37,9 +44,11 @@ def get_first_price(symbol: String, year: Int) : Option[Double] = ???
 //     stock symbols and the outer list for the years.
 
 
-def get_prices(portfolio: List[String], years: Range) : List[List[Option[Double]]] = ???
-
-
+def get_prices(portfolio: List[String], years: Range) : List[List[Option[Double]]] = {
+    years.toList.map(y => 
+                        (for(s <- portfolio) yield get_first_price(s, y))
+                    )
+}
 
 // (4) The function below calculates the change factor (delta) between
 //     a price in year n and a price in year n + 1. 

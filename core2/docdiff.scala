@@ -14,7 +14,8 @@ object C2 {
 //    The words should be Returned as a list of strings.
 
 
-def clean(s: String) : List[String] = ???
+def clean(s: String) : List[String] ={
+}
   
 
 
