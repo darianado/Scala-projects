@@ -80,7 +80,15 @@ def get_deltas(data: List[List[Option[Double]]]) :  List[List[Option[Double]]] =
 //     calculates the yearly yield, i.e. new balance, according to our dumb investment 
 //     strategy. Index points to a year in the data list.
 
-def yearly_yield(data: List[List[Option[Double]]], balance: Long, index: Int) : Long = ???
+def yearly_yield(data: List[List[Option[Double]]], balance: Long, index: Int) : Long = {
+   
+    data(index) match{
+        case Nil => balance
+        case _ => { 
+            (for(d <- data(index)) yield d.get*balance).sum.toLong / data(index).length
+        }
+    }
+}
 
 
 // (7) Write a function compound_yield that calculates the overall balance for a 
