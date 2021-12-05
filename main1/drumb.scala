@@ -53,7 +53,14 @@ def get_prices(portfolio: List[String], years: Range) : List[List[Option[Double]
 // (4) The function below calculates the change factor (delta) between
 //     a price in year n and a price in year n + 1. 
 
-def get_delta(price_old: Option[Double], price_new: Option[Double]) : Option[Double] = ???
+def get_delta(price_old: Option[Double], price_new: Option[Double]) : Option[Double] = {
+    (price_new, price_old) match {
+        case (None,_) => None
+        case (_,None) => None
+        case _ => Some( (price_new.get - price_old.get ) / price_old.get ) 
+    }
+}
+
 
 
 
