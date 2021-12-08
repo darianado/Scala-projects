@@ -46,9 +46,10 @@ def get_first_price(symbol: String, year: Int) : Option[Double] ={
 
 def get_prices(portfolio: List[String], years: Range) : List[List[Option[Double]]] = {
     years.toList.map(y => 
-                        (for(s <- portfolio) yield get_first_price(s, y))
+                        ( (for(s <- portfolio) yield get_first_price(s, y)) )
                     )
 }
+
 
 
 // (4) The function below calculates the change factor (delta) between
@@ -69,16 +70,16 @@ def get_delta(price_old: Option[Double], price_new: Option[Double]) : Option[Dou
 //     get_prices above.
 
 def get_deltas(data: List[List[Option[Double]]]) :  List[List[Option[Double]]] = {
+    val first = data(0)
    for (d <- data.tail) yield 
        for (c <- d)  yield {
            val oldYear = data.indexOf(d)-1
            val companyIndex = d.indexOf(c)
-           get_delta(  data(oldYear)(companyIndex) ,c )
+           if(oldYear<0) get_delta( first(companyIndex), c )
+           else get_delta(  data(oldYear)(companyIndex), c )
         }
                   
 }
-
-
 // (6) Write a function that given change factors, a starting balance and an index,
 //     calculates the yearly yield, i.e. new balance, according to our dumb investment 
 //     strategy. Index points to a year in the data list.
@@ -87,9 +88,10 @@ def yearly_yield(data: List[List[Option[Double]]], balance: Long, index: Int) : 
     if ( data(index).flatten.isEmpty ) balance
     else{
         val nrCompan = data(index).flatten.length
+        // println("anul index" + index +" nrcomp"+ nrCompan)
         val equalInvest = balance/nrCompan
         
-        ( for(d <- data(index).flatten) yield d*equalInvest ).sum.toLong +100
+        ( for(d <- data(index).flatten) yield d*equalInvest ).sum.toLong + balance
    
     }
 }
@@ -104,6 +106,8 @@ def yearly_yield(data: List[List[Option[Double]]], balance: Long, index: Int) : 
 
 def compound_yield(data: List[List[Option[Double]]], balance: Long, index: Int) : Long = {
 
+    //   println(balance)
+
      if(data.isEmpty) balance  
      else if (index+1 == data.size) {
         yearly_yield(data, balance, index)
@@ -115,11 +119,32 @@ def compound_yield(data: List[List[Option[Double]]], balance: Long, index: Int) 
 def investment(portfolio: List[String], years: Range, start_balance: Long) : Long = {
       
       val deltas = get_deltas(get_prices(portfolio, years))
+    //   println(get_prices(portfolio, years))
+    //   println(deltas)
         compound_yield(deltas, start_balance, 0)
 }
 
 // //Test cases for the two portfolios given above
 
+
+investment(List("GOOG", "AAPL", "BIDU"), 2000 to 2000, 100) 
+// == 100
+investment(List("GOOG", "AAPL", "BIDU"), 2000 to 2001, 100) 
+// == 27
+investment(List("GOOG", "AAPL", "BIDU"), 2000 to 2002, 100)
+//  == 42
+investment(List("GOOG", "AAPL", "BIDU"), 2000 to 2003, 100) 
+// == 27
+investment(List("GOOG", "AAPL", "BIDU"), 2000 to 2004, 100) 
+// == 38
+investment(List("GOOG", "AAPL", "BIDU"), 2000 to 2005, 100) 
+// == 113
+investment(List("GOOG", "AAPL", "BIDU"), 2000 to 2006, 100) 
+// == 254
+investment(List("GOOG", "AAPL", "BIDU"), 2000 to 2007, 100) 
+// == 349
+investment(List("GOOG", "AAPL", "BIDU"), 1990 to 2017, 100)
+//  == 11504
 
 // println("Real data: " + investment(rstate_portfolio, 1978 to 2019, 100))
 // println("Blue data: " + investment(blchip_portfolio, 1978 to 2019, 100))
