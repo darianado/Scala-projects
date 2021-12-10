@@ -15,9 +15,11 @@ object C2 {
 
 
 def clean(s: String) : List[String] ={
+    val words = """\w+""".r
+    words.findAllIn(s).toList
 }
   
-
+clean("dsa cvg dft hgt")
 
 //(2) The function occurrences calculates the number of times  
 //    strings occur in a list of strings. These occurrences should 
