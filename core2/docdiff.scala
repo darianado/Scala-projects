@@ -18,15 +18,15 @@ def clean(s: String) : List[String] ={
     val words = """\w+""".r
     words.findAllIn(s).toList
 }
-  
-clean("dsa cvg dft hgt")
 
 //(2) The function occurrences calculates the number of times  
 //    strings occur in a list of strings. These occurrences should 
 //    be calculated as a Map from strings to integers.
 
 
-def occurrences(xs: List[String]): Map[String, Int] = ???
+def occurrences(xs: List[String]): Map[String, Int] = {
+    xs.groupBy(identity).map(t => (t._1, t._2.length))
+}
 
 
 //(3) This functions calculates the dot-product of two documents
@@ -36,7 +36,18 @@ def occurrences(xs: List[String]): Map[String, Int] = ???
 //    The function finally sums up all products. 
 
 
-def prod(lst1: List[String], lst2: List[String]) : Int = ???
+def prod(lst1: List[String], lst2: List[String]) : Int = {
+    val ocL1 = occurrences(lst1)
+    val ocL2 = occurrences(lst2)
+    ( for ( w <- (lst1++lst2).distinct ) yield{
+        ( ocL1.get(w), ocL2.get(w) ) match {
+            case (None , _) => 0
+            case (_, None) => 0
+            case(x,y) => x.get*y.get
+        }
+    } ).sum
+    
+}
 
 
 //(4) Complete the functions overlap and similarity. The overlap of
@@ -45,9 +56,13 @@ def prod(lst1: List[String], lst2: List[String]) : Int = ???
 //    of the cleaned strings (see (1)).  
 
 
-def overlap(lst1: List[String], lst2: List[String]) : Double = ???
+def overlap(lst1: List[String], lst2: List[String]) : Double = {
+    prod(lst1,lst2) /   ( prod(lst1,lst1) .max( prod(lst2,lst2) ) ).toDouble
+}
 
-def similarity(s1: String, s2: String) : Double = ???
+def similarity(s1: String, s2: String) : Double = {
+    overlap( clean(s1) , clean(s2) )
+}
 
 
 
@@ -65,7 +80,7 @@ prod(list1,list2) // 7
 overlap(list1, list2)   // 0.5384615384615384
 overlap(list2, list1)   // 0.5384615384615384
 overlap(list1, list1)   // 1.0
-overlap(list2, list2)   // 1.0
+overlap(list2, list2)   // 1.0  
 
 // Plagiarism examples from 
 // https://desales.libguides.com/avoidingplagiarism/examples
