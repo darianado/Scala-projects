@@ -37,25 +37,62 @@ def split(s: String) : Toks = s.split(" ").toList
 // it helpful to implement two auxiliary functions for the pattern matching:  
 // 
 
-def is_op(op: String) : Boolean = ???
-def prec(op1: String, op2: String) : Boolean = ???
 
 
-def syard(toks: Toks, st: Toks = Nil, out: Toks = Nil) : Toks = ???
+def is_op(op: String) : Boolean = {
+	ops.contains(op)
+}
+def prec(op1: String, op2: String) : Boolean = {
+	precs(op1)>=precs(op2)
+}
 
+
+def syard(toks: Toks, st: Toks = Nil, out: Toks = Nil) : Toks = {
+	(toks, st) match {
+		case(Nil, _) => out:::st
+
+		case (x::xs,_) if x.forall(_.isDigit) => {
+								print(x) 
+								syard(xs, st, out:::List(x))}
+
+		case(x::xs, Nil) if is_op(x) => syard(xs, List(x):::st, out)
+
+		case (x::xs,y::ys) if is_op(x) => {
+			println(y)
+			println(ys)
+			if( is_op(y) && prec(y,x) ) {
+				syard(toks, ys, out:::List(y))}
+			else syard(xs , List(x):::st, out)
+		}
+
+		// case (x::xs, y::ys) if is_op(x) => {
+		// 	if( prec(y,x) ) syard(toks, List(x)::: ys, out:::List(y))
+		// 	else syard(xs , List(x):::st, out)
+		// }
+
+		case ("("::xs, _) => syard(xs, List("("):::st, out)
+
+		case(")"::xs, y::ys) => {
+			if( y=="(" ) syard(xs, st.drop(1), out)
+			else syard(toks, st.drop(1), out:::List(y))	
+		}
+
+		 case(_,_) => out:::List(" <- structure not correct from here")
+	}
+}
 
 // test cases
-//syard(split("3 + 4 * ( 2 - 1 )"))  // 3 4 2 1 - * +
-//syard(split("10 + 12 * 33"))       // 10 12 33 * +
-//syard(split("( 5 + 7 ) * 2"))      // 5 7 + 2 *
-//syard(split("5 + 7 / 2"))          // 5 7 2 / +
-//syard(split("5 * 7 / 2"))          // 5 7 * 2 /
-//syard(split("9 + 24 / ( 7 - 3 )")) // 9 24 7 3 - / +
+// syard(split("3 + 4 * ( 2 - 1 )"))  // 3 4 2 1 - * +
+// syard(split("10 + 12 * 33"))       // 10 12 33 * +
+// syard(split("( 5 + 7 ) * 2"))      // 5 7 + 2 *
+// syard(split("5 + 7 / 2"))          // 5 7 2 / +
+// syard(split("5 * 7 / 2"))          // 5 7 * 2 /
+// syard(split("9 + 24 / ( 7 - 3 )")) // 9 24 7 3 - / +
 
-//syard(split("3 + 4 + 5"))           // 3 4 + 5 +
-//syard(split("( ( 3 + 4 ) + 5 )"))    // 3 4 + 5 +
-//syard(split("( 3 + ( 4 + 5 ) )"))    // 3 4 5 + +
-//syard(split("( ( ( 3 ) ) + ( ( 4 + ( 5 ) ) ) )")) // 3 4 5 + +
+// syard(split("3 + 4 + 5"))           // 3 4 + 5 +
+// syard(split("( ( 3 + 4 ) + 5 )"))    // 3 4 + 5 +
+// syard(split("( 3 + ( 4 + 5 ) )"))    // 3 4 5 + +
+// syard(split("( ( ( 3 ) ) + ( ( 4 + ( 5 ) ) ) )")) // 3 4 5 + +
 
  
 // (2) Implement a compute function that evaluates an input list
