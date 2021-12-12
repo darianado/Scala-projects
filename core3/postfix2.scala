@@ -41,7 +41,46 @@ val ops = List("+", "-", "*", "/", "^")
 // the power operation, you can make the same assumptions as in 
 // basic version.
 
-def syard(toks: Toks, st: Toks = Nil, out: Toks = Nil) : Toks = ???
+def is_op(op: String) : Boolean = {
+	ops.contains(op)
+}
+def precGr(op1: String, op2: String) : Boolean = {
+	precs(op1)>precs(op2)
+}
+def precEq(op1: String, op2: String) : Boolean = {
+	precs(op1)==precs(op2)
+}
+
+
+def syard(toks: Toks, st: Toks = Nil, out: Toks = Nil) : Toks = {
+  (toks, st) match {
+		case(Nil, _) => out:::st
+
+		case (x::xs,_) if x.forall(_.isDigit) => syard(xs, st, out:::List(x))
+
+		case(x::xs, Nil) if is_op(x) => syard(xs, List(x):::st, out)
+
+		case (x::xs,y::ys) if is_op(x) => {
+      if( is_op(y) && precGr(y,x) ) 
+          syard(toks, ys, out:::List(y))
+      if( is_op(y) && precEq(y,x) )
+      {
+        if(assoc(y)==LA) syard(toks, ys, out:::List(y))
+        else syard(xs, List(x):::st, out)
+      }
+      else syard(xs , List(x):::st, out)
+		}
+
+		case ("("::xs, _) => syard(xs, List("("):::st, out)
+
+		case(")"::xs, y::ys) => {
+			if( y=="(" ) syard(xs, st.drop(1), out)
+			else syard(toks, st.drop(1), out:::List(y))	
+		}
+
+		case(_,_) => out:::List(" <- structure not correct from here")
+	}
+}
 
 
 // test cases
@@ -51,7 +90,38 @@ def syard(toks: Toks, st: Toks = Nil, out: Toks = Nil) : Toks = ???
 // (4) Implement a compute function that produces an Int for an
 // input list of tokens in postfix notation.
 
-def compute(toks: Toks, st: List[Int] = Nil) : Int = ???
+def compute(toks: Toks, st: List[Int] = Nil) : Int = {
+  toks match{
+		case Nil => st.head 
+
+		case x::xs if x.forall(_.isDigit) => compute(xs, st:::List(x.toInt))
+
+		case "+"::xs => {
+			val ec = st.last + st.dropRight(1).last
+			compute(xs, st.dropRight(2):::List(ec))
+			}
+
+			case "-"::xs => {
+			val ec = st.dropRight(1).last - st.last
+			compute(xs, st.dropRight(2):::List(ec))
+			}
+
+			case "*"::xs => {
+			val ec = st.dropRight(1).last * st.last
+			compute(xs, st.dropRight(2):::List(ec))
+			}
+
+			case "/"::xs => {
+			val ec = st.dropRight(1).last / st.last
+			compute(xs, st.dropRight(2):::List(ec))
+			}
+
+      case "^"::xs =>{
+        val ec = BigInt(st.dropRight(1).last).pow(st.last).toInt
+			  compute(xs, st.dropRight(2):::List(ec))
+      }
+	}
+}
 
 
 // test cases
