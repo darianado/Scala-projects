@@ -51,24 +51,15 @@ def syard(toks: Toks, st: Toks = Nil, out: Toks = Nil) : Toks = {
 	(toks, st) match {
 		case(Nil, _) => out:::st
 
-		case (x::xs,_) if x.forall(_.isDigit) => {
-								print(x) 
-								syard(xs, st, out:::List(x))}
+		case (x::xs,_) if x.forall(_.isDigit) => syard(xs, st, out:::List(x))
 
 		case(x::xs, Nil) if is_op(x) => syard(xs, List(x):::st, out)
 
 		case (x::xs,y::ys) if is_op(x) => {
-			println(y)
-			println(ys)
 			if( is_op(y) && prec(y,x) ) {
 				syard(toks, ys, out:::List(y))}
 			else syard(xs , List(x):::st, out)
 		}
-
-		// case (x::xs, y::ys) if is_op(x) => {
-		// 	if( prec(y,x) ) syard(toks, List(x)::: ys, out:::List(y))
-		// 	else syard(xs , List(x):::st, out)
-		// }
 
 		case ("("::xs, _) => syard(xs, List("("):::st, out)
 
@@ -97,12 +88,40 @@ def syard(toks: Toks, st: Toks = Nil, out: Toks = Nil) : Toks = {
  
 // (2) Implement a compute function that evaluates an input list
 // in postfix notation. This function takes a list of tokens
-// and a stack as argumenta. The function should produce the 
+// and a stack as argument. The function should produce the 
 // result as an integer using the stack. You can assume 
 // this function will be only called with proper postfix 
 // expressions.    
 
-def compute(toks: Toks, st: List[Int] = Nil) : Int = ???
+def compute(toks: Toks, st: List[Int] = Nil) : Int = {
+	toks match{
+		case Nil => st.head 
+
+		case x::xs if x.forall(_.isDigit) => compute(xs, st:::List(x.toInt))
+
+		case "+"::xs => {
+			val ec = st.last + st.dropRight(1).last
+			compute(xs, st.dropRight(2):::List(ec))
+			}
+
+			case "-"::xs => {
+			val ec = st.dropRight(1).last - st.last
+			compute(xs, st.dropRight(2):::List(ec))
+			}
+
+			case "*"::xs => {
+			val ec = st.dropRight(1).last * st.last
+			compute(xs, st.dropRight(2):::List(ec))
+			}
+
+			case "/"::xs => {
+			val ec = st.dropRight(1).last / st.last
+			compute(xs, st.dropRight(2):::List(ec))
+			}
+	}
+}
+
+
 
 
 // test cases
