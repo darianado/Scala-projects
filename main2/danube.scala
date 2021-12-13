@@ -17,7 +17,9 @@ import scala.util._
 //     the header of the CSV-file). The result is a list of strings (lines
 //     in the file).
 
-def get_csv_url(url: String) : List[String] = ???
+def get_csv_url(url: String) : List[String] = {
+    Try(Source.fromURL(url)("ISO-8859-1").getLines().toList.tail).getOrElse(List())
+}
 
 
 val ratings_url = """https://nms.kcl.ac.uk/christian.urban/ratings.csv"""
@@ -27,7 +29,7 @@ val movies_url = """https://nms.kcl.ac.uk/christian.urban/movies.csv"""
 //-----------
 //:
 //val movies = get_csv_url(movies_url)
-
+//val ratings = get_csv_url(ratings_url)
 //ratings.length  // 87313
 //movies.length   // 9742
 
@@ -40,9 +42,14 @@ val movies_url = """https://nms.kcl.ac.uk/christian.urban/movies.csv"""
 //     the argument lines, will be the output of the function get_csv_url.
 
 
-def process_ratings(lines: List[String]) : List[(String, String)] = ???
+def process_ratings(lines: List[String]) : List[(String, String)] = {
+    for( r <- lines; 
+        if( r.split(",").last.toInt >=4 )) yield ( r.split(",")(0) , r.split(",")(1) )
+}
 
-def process_movies(lines: List[String]) : List[(String, String)] = ???
+def process_movies(lines: List[String]) : List[(String, String)] = {
+    for( r <- lines) yield ( r.split(",")(0) , r.split(",")(1) )
+}
 
 
 // testcases
@@ -63,22 +70,30 @@ def process_movies(lines: List[String]) : List[(String, String)] = ???
 //     is set to Map() at the beginning of the calculation.
 
 def groupById(ratings: List[(String, String)], 
-              m: Map[String, List[String]]) : Map[String, List[String]] = ???
+              m: Map[String, List[String]]) : Map[String, List[String]] = {
+
+        ratings match {
+            case Nil => m 
+
+            case x::xs => if(m.contains(x._1) ) groupById(xs, m+( x._1 -> ( List(x._2):::m(x._1) ) ))
+                        else groupById( xs, m+( x._1 -> List(x._2) ) )
+        }
+    }
 
 
 // testcases
 //-----------
-//val ratings_map = groupById(good_ratings, Map())
-//val movies_map = movie_names.toMap
+// val ratings_map = groupById(good_ratings, Map())
+// val movies_map = movie_names.toMap
 
-//ratings_map.get("414").get.map(movies_map.get(_)) 
-//    => most prolific recommender with 1227 positive ratings
+// ratings_map.get("414").get.map(movies_map.get(_)) 
+// //    => most prolific recommender with 1227 positive ratings
 
-//ratings_map.get("474").get.map(movies_map.get(_)) 
-//    => second-most prolific recommender with 787 positive ratings
+// ratings_map.get("474").get.map(movies_map.get(_)) 
+// //    => second-most prolific recommender with 787 positive ratings
 
-//ratings_map.get("214").get.map(movies_map.get(_)) 
-//    => least prolific recommender with only 1 positive rating
+// ratings_map.get("214").get.map(movies_map.get(_)) 
+// //    => least prolific recommender with only 1 positive rating
 
 
 
@@ -89,7 +104,11 @@ def groupById(ratings: List[(String, String)],
 //     otherwise it might happen we recommend the same movie).
 
 
-def favourites(m: Map[String, List[String]], mov: String) : List[List[String]] = ???
+def favourites(m: Map[String, List[String]], mov: String) : List[List[String]] = {
+    (for( f <- m ;
+        if(f._2.contains(mov)) ) yield (for(r <- f._2;
+                                              if(r!= mov)) yield(r))).toList
+}
 
 
 // testcases
@@ -98,7 +117,7 @@ def favourites(m: Map[String, List[String]], mov: String) : List[List[String]] =
 //          "858" -> Godfather
 //          "260" -> Star Wars: Episode IV - A New Hope (1977)
 
-//favourites(ratings_map, "912").length  // => 80
+// favourites(ratings_map, "912").length  // => 80
 
 // That means there are 80 users that recommend the movie with ID 912.
 // Of these 80  users, 55 gave a good rating to movie 858 and
@@ -111,14 +130,18 @@ def favourites(m: Map[String, List[String]], mov: String) : List[List[String]] =
 //     movies sorted according to the most frequently suggested movie(s) first.
 
 def suggestions(recs: Map[String, List[String]], 
-                mov_name: String) : List[String] = ???
+                mov_name: String) : List[String] = {
+        val ordSugg= favourites(recs, mov_name).flatten.groupBy(identity)
+                                            .view.mapValues(_.size).toList.sortBy(_._2)
+        for( i<-ordSugg.reverse ) yield i._1
+    }
 
 
 // testcases
 //-----------
 
-//suggestions(ratings_map, "912")
-//suggestions(ratings_map, "912").length  
+// suggestions(ratings_map, "912")
+// suggestions(ratings_map, "912").length  
 // => 4110 suggestions with List(858, 260, 318, 593, ...)
 //    being the most frequently suggested movies
 
@@ -131,7 +154,15 @@ def suggestions(recs: Map[String, List[String]],
 
 def recommendations(recs: Map[String, List[String]],
                     movs: Map[String, String],
-                    mov_name: String) : List[String] = ???
+                    mov_name: String) : List[String] = {
+
+    val sugg =suggestions(recs, mov_name)
+    sugg match{
+        case Nil => Nil
+        case _ => ( for( s<-sugg.take(2) ) yield
+                        movs.get(s).get ) .toList
+    }
+}
 
 
 
