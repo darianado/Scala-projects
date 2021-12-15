@@ -49,7 +49,18 @@ implicit def stringOps (s: String) = new {
 // can match the empty string and Returns a boolean
 // accordingly.
 
-def nullable (r: Rexp) : Boolean = ???
+def nullable (r: Rexp) : Boolean = {
+  r match{
+    case ZERO => false
+    case ONE=> true
+    case CHAR(c)=> false
+    case ALTs(r :: rs )=> if(rs==Nil) nullable(r) 
+                          if(nullable(r)) true 
+                          else nullable(ALTs(rs))
+    case SEQ(r1, r2)=> nullable(r1) && nullable(r2)   
+    case STAR(r) => true 
+  }
+}
 
 
 // (2) Complete the function der according to
