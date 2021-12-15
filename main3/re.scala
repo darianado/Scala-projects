@@ -111,7 +111,8 @@ def flts(rs: List[Rexp]) : List[Rexp] = {
   }
 }
 
-
+// val l= List(ZERO | ONE) 
+// ALTs(flts( for(r2 <- l) yield simp(r2) ).distinct)
 
 // (4) Complete the simp function according to
 // the specification given in the coursework description; 
@@ -131,9 +132,16 @@ def simp(r: Rexp) : Rexp = {
                             case (r1, r2) => SEQ(r1, r2)
                             case _ => r
     }
-    case ALTs(Nil)=> ZERO
-    case ALTs(r1::Nil)=> r1
-    case ALTs(r1)=> ALTs(flts( for(r2 <- r1) yield simp(r2) ).distinct)
+    // case ALTs(Nil)=> ZERO
+    case ALTs(r1::Nil)=> simp(r1)
+    case ALTs(r1::r2::Nil)=> ( simp(r1), simp(r2) ) match {
+                                  case (r, ZERO) => r
+                                  case (ZERO, r) => r
+                                  case (rx, rs) => if( rx == rs) simp(rx) 
+                                                    else ALT(simp(rx), simp(rs))
+
+    }
+    case ALTs(r1)=> simp(ALTs(flts( for(r2 <- r1) yield simp(r2) ).distinct))
     case _ => r
   }
 }
