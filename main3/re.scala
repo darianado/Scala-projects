@@ -54,13 +54,21 @@ def nullable (r: Rexp) : Boolean = {
     case ZERO => false
     case ONE=> true
     case CHAR(c)=> false
-    case ALTs(r :: rs )=> if(rs==Nil) nullable(r) 
-                          if(nullable(r)) true 
-                          else nullable(ALTs(rs))
+    case ALTs(Nil)=> false
+    case ALTs(r :: rs )=> nullable(r) || nullable(ALTs(rs)) 
     case SEQ(r1, r2)=> nullable(r1) && nullable(r2)   
     case STAR(r) => true 
   }
 }
+
+// nullable(ZERO) == false
+// nullable(ONE) == true
+// nullable(CHAR('a')) == false
+// nullable(ZERO | ONE) == true
+// nullable(ZERO | CHAR('a')) == false
+// nullable(ONE ~ ONE) == true
+// nullable(ONE ~ CHAR('a')) == false
+// nullable(STAR(ZERO)) == true
 
 
 // (2) Complete the function der according to
