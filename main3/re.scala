@@ -76,8 +76,26 @@ def nullable (r: Rexp) : Boolean = {
 // function calculates the derivative of a 
 // regular expression w.r.t. a character.
 
-def der (c: Char, r: Rexp) : Rexp = ???
+def der (c: Char, r: Rexp) : Rexp = {
+  r match{
+    case ZERO => ZERO
+    case ONE=> ZERO
+    case CHAR(d)=> if(c==d) ONE else ZERO
+    case ALTs(r1:: r2:: Nil)=> ALT(der(c,r1), der(c,r2))
+    case ALTs(r :: rs )=> ALT(der(c,r), der(c,ALTs(rs))) 
+    case SEQ(r1, r2)=> {
+      if(nullable(r1)) ALT(SEQ(der(c,r1), r2), der(c,r2))
+      else SEQ(der(c,r1),r2)
+    }  
+    case STAR(r) => SEQ(der(c,r), STAR(r))
+  }
+}
 
+// der('a', ZERO | ONE) == (ZERO | ZERO)
+// der('a', (CHAR('a') | ONE) ~ CHAR('a')) ==
+// ALT((ONE | ZERO) ~ CHAR('a'), ONE)
+// der('a', STAR(CHAR('a'))) == (ONE ~ STAR(CHAR('a')))
+// der('b', STAR(CHAR('a'))) == (ZERO ~ STAR(CHAR('a')))
 
 // (3) Implement the flatten function flts. It
 // deletes 0s from a list of regular expressions
