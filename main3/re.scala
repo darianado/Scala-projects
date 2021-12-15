@@ -102,7 +102,14 @@ def der (c: Char, r: Rexp) : Rexp = {
 // and also 'spills out', or flattens, nested 
 // ALTernativeS.
 
-def flts(rs: List[Rexp]) : List[Rexp] = ???
+def flts(rs: List[Rexp]) : List[Rexp] = {
+  rs match{
+    case Nil=> Nil
+    case ZERO::rest=> flts(rest)
+    case ALTs(rs1)::rest=> rs1:::flts(rest)
+    case r::rest=> List(r):::flts(rest)
+  }
+}
 
 
 
@@ -114,8 +121,40 @@ def flts(rs: List[Rexp]) : List[Rexp] = ???
 // STAR-regular expressions. Use the _.distinct and 
 // flts functions.
 
-def simp(r: Rexp) : Rexp = ???
+def simp(r: Rexp) : Rexp = {
+  r match {
+    case SEQ(r1,r2) => (simp(r1), simp(r2)) match{
+                            case (ZERO,_)=> ZERO
+                            case (_,ZERO)=> ZERO
+                            case (ONE,r1)=> r1
+                            case (r1,ONE)=> r1
+                            case (r1, r2) => SEQ(r1, r2)
+                            case _ => r
+    }
+    case ALTs(Nil)=> ZERO
+    case ALTs(r1::Nil)=> r1
+    case ALTs(r1)=> ALTs(flts( for(r2 <- r1) yield simp(r2) ).distinct)
+    case _ => r
+  }
+}
 
+
+
+// simp(ZERO | ONE) == ONE
+// simp(STAR(ZERO | ONE)) == STAR(ZERO | ONE)
+// simp(ONE ~ (ONE ~ (ONE ~ CHAR('a')))) == CHAR('a')
+// simp(((ONE ~ ONE) ~ ONE) ~ CHAR('a')) == CHAR('a'))
+//simp(((ONE | ONE) ~ ONE) ~ CHAR('a')) == CHAR('a'))
+// simp(ONE ~ (ONE ~ (ONE ~ ZERO))) == ZERO
+// simp(ALT(ONE ~ (ONE ~ (ONE ~ ZERO)), CHAR('a'))) == CHAR('a')
+// simp(CHAR('a') | CHAR('a')) == CHAR('a')
+//simp(CHAR('a') ~ CHAR('a')) == CHAR('a') ~ CHAR('a')
+// simp(ONE | CHAR('a')) == (ONE | CHAR('a'))
+// simp(ALT((CHAR('a') | ZERO) ~ ONE,((ONE | CHAR('b')) | CHAR('c')) ~ (CHAR('d') ~ ZERO))) == CHAR('a')
+//simp((ZERO | ((ZERO | ZERO) | (ZERO | ZERO))) ~ ((ONE | ZERO) | ONE ) ~ (CHAR('a'))) == ZERO
+// simp(ALT(ONE | ONE, ONE | ONE)) == ONE
+// simp(ALT(ZERO | CHAR('a'), CHAR('a') | ZERO)) == CHAR('a')
+// simp(ALT(ONE | CHAR('a'), CHAR('a') | ONE)) == ALT(ONE, CHAR('a'))
 
 // (5) Complete the two functions below; the first 
 // calculates the derivative w.r.t. a string; the second
