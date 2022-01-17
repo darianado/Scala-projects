@@ -176,7 +176,7 @@ def simp(r: Rexp) : Rexp = {
 // expression and a string and checks whether the
 // string matches the regular expression
 
-def ders (s: List[Char], r: Rexp) : Rexp = {
+def ders (s: List[Char], r: Rexp) : Rexp = s match {
   case Nil => r
   case c::cs => ders(cs,simp(der(c,r)))
 }
