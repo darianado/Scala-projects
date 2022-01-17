@@ -176,9 +176,14 @@ def simp(r: Rexp) : Rexp = {
 // expression and a string and checks whether the
 // string matches the regular expression
 
-def ders (s: List[Char], r: Rexp) : Rexp = ???
+def ders (s: List[Char], r: Rexp) : Rexp = {
+  case Nil => r
+  case c::cs => ders(cs,simp(der(c,r)))
+}
 
-def matcher(r: Rexp, s: String): Boolean = ???
+def matcher(r: Rexp, s: String): Boolean = {
+  nullable(ders(s.toList, r))
+}
 
 
 // (6) Complete the size function for regular
