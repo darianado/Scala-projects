@@ -138,16 +138,21 @@ def simp(r: Rexp) : Rexp = {
                                   case (r, ZERO) => r
                                   case (ZERO, r) => r
                                   case (rx, rs) => if( rx == rs) simp(rx) 
-                                                    else ALT(simp(rx), simp(rs))
-
-    }
+                                                    else (rx,rs) match{
+                                                      case (ALTs(rp), ALTs(rd)) => if( rp.toSet == rd.toSet) simp(ALTs(rp))
+                                                                                    else ALT(simp(rx), simp(rs))
+                                                      case _ => ALT(simp(rx), simp(rs))
+                                                    }
+                                                    
+                                  }
     case ALTs(r1)=> simp(ALTs(flts( for(r2 <- r1) yield simp(r2) ).distinct))
     case _ => r
   }
 }
 
 
-
+// simp(ALTs(List(ONE, CHAR('a'))))
+// simp(ALTs(List(ALTs(List(ONE, CHAR('a'))), ALTs(List(CHAR('a'), ONE)))))
 // simp(ZERO | ONE) == ONE
 // simp(STAR(ZERO | ONE)) == STAR(ZERO | ONE)
 // simp(ONE ~ (ONE ~ (ONE ~ CHAR('a')))) == CHAR('a')
@@ -157,12 +162,13 @@ def simp(r: Rexp) : Rexp = {
 // simp(ALT(ONE ~ (ONE ~ (ONE ~ ZERO)), CHAR('a'))) == CHAR('a')
 // simp(CHAR('a') | CHAR('a')) == CHAR('a')
 //simp(CHAR('a') ~ CHAR('a')) == CHAR('a') ~ CHAR('a')
-// simp(ONE | CHAR('a')) == (ONE | CHAR('a'))
+     // simp(ONE | CHAR('a')) == (ONE | CHAR('a'))
 // simp(ALT((CHAR('a') | ZERO) ~ ONE,((ONE | CHAR('b')) | CHAR('c')) ~ (CHAR('d') ~ ZERO))) == CHAR('a')
 //simp((ZERO | ((ZERO | ZERO) | (ZERO | ZERO))) ~ ((ONE | ZERO) | ONE ) ~ (CHAR('a'))) == ZERO
 // simp(ALT(ONE | ONE, ONE | ONE)) == ONE
 // simp(ALT(ZERO | CHAR('a'), CHAR('a') | ZERO)) == CHAR('a')
 // simp(ALT(ONE | CHAR('a'), CHAR('a') | ONE)) == ALT(ONE, CHAR('a'))
+// List(ONE , CHAR('a')).toSet == List( CHAR('a'),ONE ).toSet
 
 // (5) Complete the two functions below; the first 
 // calculates the derivative w.r.t. a string; the second
