@@ -182,7 +182,7 @@ def ders (s: List[Char], r: Rexp) : Rexp = s match {
 }
 
 def matcher(r: Rexp, s: String): Boolean = {
-  nullable(ders(s.toList, r))
+  nullable( ders(s.toList, r) )
 }
 
 
@@ -190,7 +190,16 @@ def matcher(r: Rexp, s: String): Boolean = {
 // expressions according to the specification 
 // given in the coursework.
 
-def size(r: Rexp): Int = ???
+def size(r: Rexp): Int = {
+  r match{
+    case ZERO => 1
+    case ONE => 1
+    case CHAR(_) => 1
+    case ALTs(r) => (for(x <-r) yield size(x)).sum + 1 
+    case SEQ(r1,r2) => 1 + size(r1) + size(r2)
+    case STAR(r) => 1 + size(r)
+  }
+}
 
 
 // some testing data
