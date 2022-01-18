@@ -58,11 +58,15 @@ def legal_moves(dim: Int, path: Path, x: Pos) : List[Pos] = {
 //    and the second collects all tours in a list of paths.
 
 def count_tours(dim: Int, path: Path) : Int = {
-  (for(i<- legal_moves(dim, path, path.head)) yield count_tours(dim, i::path)).sum
+  if(path.length == dim*dim) 1
+  else
+    (for(i<- legal_moves(dim, path, path.head)) yield count_tours(dim, i::path)).sum
 }
 
 def enum_tours(dim: Int, path: Path) : List[Path] = {
-  
+  if(path.length == dim*dim) List(path)
+  else
+    (for(i<- legal_moves(dim, path, path.head)) yield enum_tours(dim, i::path)).flatten
 }
 
 
