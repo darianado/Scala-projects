@@ -57,9 +57,13 @@ def legal_moves(dim: Int, path: Path, x: Pos) : List[Pos] = {
 //    given path. The first function counts all possible tours, 
 //    and the second collects all tours in a list of paths.
 
-def count_tours(dim: Int, path: Path) : Int = ???
+def count_tours(dim: Int, path: Path) : Int = {
+  (for(i<- legal_moves(dim, path, path.head)) yield count_tours(dim, i::path)).sum
+}
 
-def enum_tours(dim: Int, path: Path) : List[Path] = ???
+def enum_tours(dim: Int, path: Path) : List[Path] = {
+  
+}
 
 
 //(4) Implement a first-function that finds the first 
