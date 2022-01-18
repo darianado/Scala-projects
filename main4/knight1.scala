@@ -100,7 +100,11 @@ def first(xs: List[Pos], f: Pos => Option[Path]) : Option[Path] = {
 //    trying out onward moves, and searches recursively for a
 //    knight tour on a dim * dim-board.
 
-def first_tour(dim: Int, path: Path) : Option[Path] = ???
+def first_tour(dim: Int, path: Path) : Option[Path] = {
+  if(path.length == dim*dim) Some(path)
+  else 
+    first(legal_moves(dim,path,path.head), x=> first_tour(dim,x::path))
+}
  
 
 
