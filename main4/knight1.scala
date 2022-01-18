@@ -9,7 +9,7 @@ object M4a {
 // templates below. Also have a look whether the functions
 // at the end of the file are of any help.
 
-
+import scala.annotation.tailrec
 
 type Pos = (Int, Int)    // a position on a chessboard 
 type Path = List[Pos]    // a path...a list of positions
@@ -75,7 +75,17 @@ def enum_tours(dim: Int, path: Path) : List[Path] = {
 //    In that case Return f(x), otherwise None. If possible,
 //    calculate f(x) only once.
 
-def first(xs: List[Pos], f: Pos => Option[Path]) : Option[Path] = ???
+@tailrec
+def first(xs: List[Pos], f: Pos => Option[Path]) : Option[Path] = {
+  xs match{
+    case Nil => None
+    case x::xs =>{
+      val fdx = f(x)
+      if(fdx.isDefined) fdx
+      else first(xs,f)
+    }
+  }
+}
 
 
 // testcases
