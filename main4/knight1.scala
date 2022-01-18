@@ -17,7 +17,11 @@ type Path = List[Pos]    // a path...a list of positions
 //(1) Complete the function that tests whether the position x
 //    is inside the board and not yet element in the path.
 
-def is_legal(dim: Int, path: Path, x: Pos) : Boolean = ???
+def is_legal(dim: Int, path: Path, x: Pos) : Boolean = {
+  !path.contains(x) &&
+          x._1>=0 && x._1<dim && 
+          x._2>=0 && x._2<dim
+}
 
 
 
@@ -25,13 +29,23 @@ def is_legal(dim: Int, path: Path, x: Pos) : Boolean = ???
 //    all legal onward moves that are not already in the path. 
 //    The moves should be ordered in a "clockwise" manner.
  
-def legal_moves(dim: Int, path: Path, x: Pos) : List[Pos] = ???
-
+def legal_moves(dim: Int, path: Path, x: Pos) : List[Pos] = {
+  List( 
+    (x._1 +1 , x._2 +2),
+    (x._1 +2 , x._2 +1),
+    (x._1 +2 , x._2 -1),
+    (x._1 +1 , x._2 -2),
+    (x._1 -1 , x._2 -2),
+    (x._1 -2 , x._2 -1),
+    (x._1 -2 , x._2 +1),
+    (x._1 -1 , x._2 +2),
+  ).filter(x => is_legal(dim,path,x))
+}
 
 //some testcases
 //
 //assert(legal_moves(8, Nil, (2,2)) == 
-//  List((3,4), (4,3), (4,1), (3,0), (1,0), (0,1), (0,3), (1,4)))
+ // List((3,4), (4,3), (4,1), (3,0), (1,0), (0,1), (0,3), (1,4)))
 //assert(legal_moves(8, Nil, (7,7)) == List((6,5), (5,6)))
 //assert(legal_moves(8, List((4,1), (1,0)), (2,2)) == 
 //  List((3,4), (4,3), (3,0), (0,1), (0,3), (1,4)))
