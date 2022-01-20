@@ -35,6 +35,29 @@ import io.Source
 import scala.util._
 
 
+def jumpRight(prog: String, pc: Int, level: Int) : Int = {
+    if(pc<prog.length()){
+        prog(pc) match{
+            case '[' => jumpRight(prog,pc+1,level+1)
+            case ']' => if(level==0) pc+1
+                        else jumpRight(prog,pc+1,level-1)
+            case _=> if(pc+1== prog.length) pc+1 else jumpRight(prog,pc+1,level)
+        }
+    }
+    else pc
+}
+
+def jumpLeft(prog: String, pc: Int, level: Int) : Int = {
+    if(pc>=0){
+        prog(pc) match{
+            case '[' => if(level==0) pc+1
+                        else jumpLeft(prog,pc-1,level-1)
+            case ']' => jumpLeft(prog,pc-1,level+1)
+            case _=> if(pc==0) pc else jumpLeft(prog,pc-1,level)
+        }
+    }
+    else pc
+}
 // TASKS
 //=======
 
@@ -68,7 +91,14 @@ import scala.util._
 //     you should immediately look up the jump address in the jtable.
  
 
-def jtable(pg: String) : Map[Int, Int] = ???
+def jtable(pg: String) : Map[Int, Int] = {
+  ( for (i <- (0 until pg.length).toList) yield{
+          if(pg(i) =='[')  (i, jumpRight(pg, i+1, 0))
+          else if(pg(i) == ']') (i, jumpLeft(pg, i-1, 0))
+          else (-1,-1)
+        }
+  ).toMap - (-1)
+}
 
 
 // testcase

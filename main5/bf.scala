@@ -83,7 +83,7 @@ def jumpLeft(prog: String, pc: Int, level: Int) : Int = {
 //jumpRight("""--[..[+>]--],>,++""", 3, 0)       // => 12
 //jumpRight("""--[..[[-]+>[.]]--],>,++""", 3, 0) // => 18
 //jumpRight("""--[..[[-]+>[.]]--,>,++""", 3, 0)  // => 22 (outside)
-//jumpLeft("""[******]***""", 7, 0)              // => -1 (outside)
+   //  jumpLeft("""[******]***""", 7, 0)              // => -1 (outside)
 
 
 
