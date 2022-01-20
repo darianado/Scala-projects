@@ -120,7 +120,7 @@ def compute(prog: String, pc: Int, mp: Int, mem: Mem) : Mem = {
                 else compute (prog, pc+1, mp, mem)
             }
             case ']' => {
-                if(sread(mem,mp)) compute(prog, jumpLeft(prog, pc-1, 0), mp, mem)
+                if(sread(mem,mp) != 0) compute(prog, jumpLeft(prog, pc-1, 0), mp, mem)
                 else compute (prog, pc+1, mp, mem)
             }
             case _ => compute (prog, pc+1, mp, mem)
@@ -128,7 +128,9 @@ def compute(prog: String, pc: Int, mp: Int, mem: Mem) : Mem = {
     }
 }
 
-def run(prog: String, m: Mem = Map()) = compute(prog,0,0, m)
+def run(prog: String, m: Mem = Map()) = {
+    compute(prog,0,0, m)
+}
 
 
 
