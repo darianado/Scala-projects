@@ -58,7 +58,7 @@ def jumpRight(prog: String, pc: Int, level: Int) : Int = {
             case '[' => jumpRight(prog,pc+1,level+1)
             case ']' => if(level==0) pc+1
                         else jumpRight(prog,pc+1,level-1)
-            case _=> jumpRight(prog,pc+1,level)
+            case _=> if(pc+1== prog.length) pc+1 else jumpRight(prog,pc+1,level)
         }
     }
     else pc
@@ -70,7 +70,7 @@ def jumpLeft(prog: String, pc: Int, level: Int) : Int = {
             case '[' => if(level==0) pc+1
                         else jumpLeft(prog,pc-1,level-1)
             case ']' => jumpLeft(prog,pc-1,level+1)
-            case _=> jumpLeft(prog,pc+1,level)
+            case _=> if(pc==0) pc else jumpLeft(prog,pc-1,level)
         }
     }
     else pc
@@ -103,9 +103,32 @@ def jumpLeft(prog: String, pc: Int, level: Int) : Int = {
 // counter and memory counter set to 0.
 
 
-def compute(prog: String, pc: Int, mp: Int, mem: Mem) : Mem = ???
+def compute(prog: String, pc: Int, mp: Int, mem: Mem) : Mem = {
+    if(pc>=prog.length || pc<0) mem
+    else{
+        prog(pc) match {
+            case '>' => compute(prog, pc+1, mp+1, mem)
+            case '<' => compute(prog, pc+1, mp-1, mem)
+            case '+' => compute(prog, pc+1, mp, write(mem,mp, spread(mem,mp) +1) )
+            case '-' => compute(prog, pc+1, mp, write(mem,mp, spread(mem,mp) -1) )
+            case '.' => {
+                    print(spread(mem,mp).toChar)
+                    compute(prog, pc+1, mp, mem)
+                }
+            case '[' => {
+                if(spread(mem,mp) == 0) compute(prog, jumpRight(prog, pc+1, 0), mp, mem)
+                else compute (prog, pc+1, mp, mem)
+            }
+            case ']' => {
+                if(spread(mem,mp)) compute(prog, jumpLeft(prog, pc-1, 0), mp, mem)
+                else compute (prog, pc+1, mp, mem)
+            }
+            case _ => compute (prog, pc+1, mp, mem)
+        }
+    }
+}
 
-def run(prog: String, m: Mem = Map()) = ???
+def run(prog: String, m: Mem = Map()) = compute(prog,0,0, m)
 
 
 
