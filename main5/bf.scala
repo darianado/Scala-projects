@@ -52,9 +52,29 @@ def write(mem: Mem, mp: Int, v: Int) : Mem = {
 // jumpLeft implements the move to the left to just after
 // the *matching* [-command.
 
-def jumpRight(prog: String, pc: Int, level: Int) : Int = ???
+def jumpRight(prog: String, pc: Int, level: Int) : Int = {
+    if(pc<prog.length()){
+        prog(pc) match{
+            case '[' => jumpRight(prog,pc+1,level+1)
+            case ']' => if(level==0) pc+1
+                        else jumpRight(prog,pc+1,level-1)
+            case _=> jumpRight(prog,pc+1,level)
+        }
+    }
+    else pc
+}
 
-def jumpLeft(prog: String, pc: Int, level: Int) : Int = ???
+def jumpLeft(prog: String, pc: Int, level: Int) : Int = {
+    if(pc<>=0){
+        prog(pc) match{
+            case '[' => if(level==0) pc+1
+                        else jumpLeft(prog,pc-1,level-1)
+            case ']' => jumpLeft(prog,pc-1,level+1)
+            case _=> jumpLeft(prog,pc+1,level)
+        }
+    }
+    else pc
+}
 
 
 // testcases
