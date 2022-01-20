@@ -35,6 +35,23 @@ import io.Source
 import scala.util._
 
 
+
+
+def load_bff(name: String) : String = {
+    Try(Source.fromFile(name).mkString).getOrElse("")
+}
+
+
+def sread(mem: Mem, mp: Int) : Int = {
+    if(mem.keySet.contains(mp)) mem(mp)
+    else 0
+}
+
+def write(mem: Mem, mp: Int, v: Int) : Mem = {
+    mem + (mp->v)
+}
+
+
 def jumpRight(prog: String, pc: Int, level: Int) : Int = {
     if(pc<prog.length()){
         prog(pc) match{
@@ -107,8 +124,33 @@ def jtable(pg: String) : Map[Int, Int] = {
 // =>  Map(69 -> 61, 5 -> 20, 60 -> 70, 27 -> 44, 43 -> 28, 19 -> 6)
 
 
-def compute2(pg: String, tb: Map[Int, Int], pc: Int, mp: Int, mem: Mem) : Mem = ???
-def run2(pg: String, m: Mem = Map()) = ???
+def compute2(pg: String, tb: Map[Int, Int], pc: Int, mp: Int, mem: Mem) : Mem = {
+   if(pc>=pg.length || pc<0) mem
+    else{
+        pg(pc) match {
+            case '>' => compute2(pg, tb, pc+1, mp+1, mem)
+            case '<' => compute2(pg, tb, pc+1, mp-1, mem)
+            case '+' => compute2(pg, tb, pc+1, mp, write(mem,mp, sread(mem,mp) +1) )
+            case '-' => compute2(pg, tb, pc+1, mp, write(mem,mp, sread(mem,mp) -1) )
+            case '.' => {
+                    print(sread(mem,mp).toChar)
+                    compute2(pg, tb, pc+1, mp, mem)
+                }
+            case '[' => {
+                if(sread(mem,mp) == 0) compute2(pg, tb, tb(pc), mp, mem)
+                else compute2 (pg, tb, pc+1, mp, mem)
+            }
+            case ']' => {
+                if(sread(mem,mp) != 0) compute2(pg, tb, tb(pc), mp, mem)
+                else compute2 (pg, tb, pc+1, mp, mem)
+            }
+            case _ => compute2 (pg, tb, pc+1, mp, mem)
+        }
+    }
+}
+def run2(pg: String, m: Mem = Map()) = {
+  compute2(pg,jtable(pg),0,0, m)
+}
 
 
 // testcases
