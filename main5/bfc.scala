@@ -173,11 +173,39 @@ def run2(pg: String, m: Mem = Map()) = {
 // by using the Scala method .replaceAll you can replace it with the 
 // string "0" standing for the new bf-command.
 
-def optimise(s: String) : String = ???
+def optimise(s: String) : String = {
+  s.replaceAll("""[^<>+\‐.\[\]]""","").replaceAll("""\[‐\]""","0")
+}
 
-def compute3(pg: String, tb: Map[Int, Int], pc: Int, mp: Int, mem: Mem) : Mem = ???
+def compute3(pg: String, tb: Map[Int, Int], pc: Int, mp: Int, mem: Mem) : Mem = {
+  if(pc>=pg.length || pc<0) mem
+    else{
+        pg(pc) match {
+            case '0' => compute3(pg, tb, pc+1, mp, write(mem,mp,0))
+            case '>' => compute2(pg, tb, pc+1, mp+1, mem)
+            case '<' => compute2(pg, tb, pc+1, mp-1, mem)
+            case '+' => compute2(pg, tb, pc+1, mp, write(mem,mp, sread(mem,mp) +1) )
+            case '-' => compute2(pg, tb, pc+1, mp, write(mem,mp, sread(mem,mp) -1) )
+            case '.' => {
+                    print(sread(mem,mp).toChar)
+                    compute2(pg, tb, pc+1, mp, mem)
+                }
+            case '[' => {
+                if(sread(mem,mp) == 0) compute2(pg, tb, tb(pc), mp, mem)
+                else compute2 (pg, tb, pc+1, mp, mem)
+            }
+            case ']' => {
+                if(sread(mem,mp) != 0) compute2(pg, tb, tb(pc), mp, mem)
+                else compute2 (pg, tb, pc+1, mp, mem)
+            }
+            case _ => compute2 (pg, tb, pc+1, mp, mem)
+        }
+    }
+}
 
-def run3(pg: String, m: Mem = Map()) = ???
+def run3(pg: String, m: Mem = Map()) = {
+  compute3(optimise(pg), jtable(optimise(pg)), 0,0, m)
+}
 
 
 // testcases
