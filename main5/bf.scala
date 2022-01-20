@@ -65,7 +65,7 @@ def jumpRight(prog: String, pc: Int, level: Int) : Int = {
 }
 
 def jumpLeft(prog: String, pc: Int, level: Int) : Int = {
-    if(pc<>=0){
+    if(pc>=0){
         prog(pc) match{
             case '[' => if(level==0) pc+1
                         else jumpLeft(prog,pc-1,level-1)
