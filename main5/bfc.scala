@@ -174,7 +174,7 @@ def run2(pg: String, m: Mem = Map()) = {
 // string "0" standing for the new bf-command.
 
 def optimise(s: String) : String = {
-  s.replaceAll("""[^<>+\‐.\[\]]""","").replaceAll("""\[‐\]""","0")
+  s.replaceAll("""[^<>+\-.\[\]]""","").replaceAll("""\[-\]""","0")
 }
 
 def compute3(pg: String, tb: Map[Int, Int], pc: Int, mp: Int, mem: Mem) : Mem = {
