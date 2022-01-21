@@ -38,7 +38,7 @@ import scala.util._
 
 
 def load_bff(name: String) : String = {
-    Try(Source.fromFile(name).mkString.replace("\n", "")).getOrElse("")
+    Try(Source.fromFile(name).mkString).getOrElse("")
 }
 
 
@@ -182,23 +182,23 @@ def compute3(pg: String, tb: Map[Int, Int], pc: Int, mp: Int, mem: Mem) : Mem = 
     else{
         pg(pc) match {
             case '0' => compute3(pg, tb, pc+1, mp, write(mem,mp,0))
-            case '>' => compute2(pg, tb, pc+1, mp+1, mem)
-            case '<' => compute2(pg, tb, pc+1, mp-1, mem)
-            case '+' => compute2(pg, tb, pc+1, mp, write(mem,mp, sread(mem,mp) +1) )
-            case '-' => compute2(pg, tb, pc+1, mp, write(mem,mp, sread(mem,mp) -1) )
+            case '>' => compute3(pg, tb, pc+1, mp+1, mem)
+            case '<' => compute3(pg, tb, pc+1, mp-1, mem)
+            case '+' => compute3(pg, tb, pc+1, mp, write(mem,mp, sread(mem,mp) +1) )
+            case '-' => compute3(pg, tb, pc+1, mp, write(mem,mp, sread(mem,mp) -1) )
             case '.' => {
                     print(sread(mem,mp).toChar)
-                    compute2(pg, tb, pc+1, mp, mem)
+                    compute3(pg, tb, pc+1, mp, mem)
                 }
             case '[' => {
-                if(sread(mem,mp) == 0) compute2(pg, tb, tb(pc), mp, mem)
-                else compute2 (pg, tb, pc+1, mp, mem)
+                if(sread(mem,mp) == 0) compute3(pg, tb, tb(pc), mp, mem)
+                else compute3 (pg, tb, pc+1, mp, mem)
             }
             case ']' => {
-                if(sread(mem,mp) != 0) compute2(pg, tb, tb(pc), mp, mem)
-                else compute2 (pg, tb, pc+1, mp, mem)
+                if(sread(mem,mp) != 0) compute3(pg, tb, tb(pc), mp, mem)
+                else compute3 (pg, tb, pc+1, mp, mem)
             }
-            case _ => compute2 (pg, tb, pc+1, mp, mem)
+            case _ => compute3 (pg, tb, pc+1, mp, mem)
         }
     }
 }
@@ -238,10 +238,12 @@ def run3(pg: String, m: Mem = Map()) = {
 //  Adapt the compute4 and run4 functions such that they can deal
 //  appropriately with such two-character commands.
 
+val alph = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".map(x => x.toByte-64 -> x).toMap
+val alphL = (for ((k,v) <- alph) yield (v,k)).toMap
+//alph.find(_._2 == 'H').map(_._1).get
 
 def combine(s: String) : String = {
-  val alph = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".map(x => x.toByte-64 -> x).toMap
-  val grouped = s.split("(?<=(.))(?!\\1)").toList 
+  val grouped = s.replace("\n", "").split("(?<=(.))(?!\\1)").toList 
   (for(ss<- grouped) yield{
     if (ss.head.toString.matches("[+\\-><]")) {
       val l = ss.length
@@ -260,19 +262,46 @@ def combine(s: String) : String = {
 // combine(load_bff("benchmark.bf"))
 
 
-def compute4(pg: String, tb: Map[Int, Int], pc: Int, mp: Int, mem: Mem) : Mem = ???
+def compute4(pg: String, tb: Map[Int, Int], pc: Int, mp: Int, mem: Mem) : Mem = {
+   if(pc>=pg.length || pc<0) mem
+    else{
+        pg(pc) match {
+            case '0' => compute4(pg, tb, pc+1, mp, write(mem,mp,0))
+            case '>' => compute4(pg, tb, pc+2, mp+ alphL(pg(pc+1)), mem)
+            case '<' => compute4(pg, tb, pc+2, mp- alphL(pg(pc+1)), mem)
+            case '+' => compute4(pg, tb, pc+2, mp, write(mem,mp, sread(mem,mp) + alphL(pg(pc+1))  ) )
+            case '-' => compute4(pg, tb, pc+2, mp, write(mem,mp, sread(mem,mp) - alphL(pg(pc+1)) ) )
+            case '.' => {
+                    print(sread(mem,mp).toChar)
+                    compute4(pg, tb, pc+1, mp, mem)
+                }
+            case '[' => {
+                if(sread(mem,mp) == 0) compute4(pg, tb, tb(pc), mp, mem)
+                else compute4 (pg, tb, pc+1, mp, mem)
+            }
+            case ']' => {
+                if(sread(mem,mp) != 0) compute4(pg, tb, tb(pc), mp, mem)
+                else compute4 (pg, tb, pc+1, mp, mem)
+            }
+            case _ => compute4 (pg, tb, pc+1, mp, mem)
+        }
+    }
+}
 
 
 // should call first optimise and then combine on the input string
 //
-def run4(pg: String, m: Mem = Map()) = ???
+def run4(pg: String, m: Mem = Map()) = {
+  val x = combine(optimise(pg))
+  compute4(x ,jtable(x), 0, 0, m)
+}
 
 
 // testcases
 // combine(optimise(load_bff("benchmark.bf"))) // => """>A+B[<A+M>A-A]<A[[....."""
 
 // testcases (they should now run much faster)
-// time_needed(1, run4(load_bff("benchmark.bf")))
+// time_needed(1, run2(load_bff("benchmark.bf")))
 // time_needed(1, run4(load_bff("sierpinski.bf"))) 
 // time_needed(1, run4(load_bff("mandelbrot.bf")))
 
