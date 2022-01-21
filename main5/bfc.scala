@@ -38,7 +38,7 @@ import scala.util._
 
 
 def load_bff(name: String) : String = {
-    Try(Source.fromFile(name).mkString).getOrElse("")
+    Try(Source.fromFile(name).mkString.replace("\n", "")).getOrElse("")
 }
 
 
@@ -239,8 +239,23 @@ def run3(pg: String, m: Mem = Map()) = {
 //  appropriately with such two-character commands.
 
 
-def combine(s: String) : String = ???
-
+def combine(s: String) : String = {
+  val alph = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".map(x => x.toByte-64 -> x).toMap
+  val grouped = s.split("(?<=(.))(?!\\1)").toList 
+  (for(ss<- grouped) yield{
+    if (ss.head.toString.matches("[+\\-><]")) {
+      val l = ss.length
+      if (l <= 26) s"${ss.head}${alph(l)}"
+      else {
+        val ti = l/26
+        val re = l%26
+        if (re == 0) (s"${ss.head}Z"*ti) else (s"${ss.head}Z"*ti) + s"${ss.head}${alph(re)}"
+      }
+    }
+    else ss
+  }).mkString
+}
+// val s = load_bff("benchmark.bf")
 // testcase
 // combine(load_bff("benchmark.bf"))
 
